@@ -1,0 +1,53 @@
+.fon{
+  display: inline-block;
+  font-size: 17px;
+  border-top: 3px solid #004fa3;
+  border-radius: 8px;
+
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+.acl{ /* div */
+  background: #48cae2;
+
+  padding-left: 1px;
+  padding-top: 2px;
+  padding-right: 1px;
+  padding-bottom: 2px;
+}
+.amod{ /* div */
+  background: #48cae2;
+
+  padding-left: 1px;
+  padding-top: 2px;
+  padding-right: 1px;
+  padding-bottom: 2px;
+}
+.gerund{ /* div */
+  background: #34ffba;
+
+  padding-left: 1px;
+  padding-top: 2px;
+  padding-right: 1px;
+  padding-bottom: 2px;
+}
+.main{ /* div */
+  background: #a1ceff;
+
+  padding-left: 6px;
+  padding-top: 3px;
+  padding-right: 6px;
+  padding-bottom: 3px;
+}
+.class{
+  align-items: center;
+  justify-content: flex-start;
+
+  border-top: 3px solid #004fa3;
+  border-radius: 8px;
+
+  padding: 10px;
+  padding-top: 6px;
+
+  background: #d6dfe9;
+}

@@ -1,0 +1,87 @@
+.word {
+    margin-left: 6px;
+}
+.dash_dotted_line {
+    background: url(../img/dash_dotted_line.png) repeat-x bottom;
+    background-image: url(../img/dash_dotted_line.png);
+    background-position-x: center;
+    background-position-y: bottom;
+    background-size: initial;
+    background-repeat-x: repeat;
+    background-repeat-y: no-repeat;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+}
+.double_line {
+    background: url(../img/double_line.png) repeat-x bottom;
+    background-image: url(../img/double_line.png);
+    background-position-x: center;
+    background-position-y: bottom;
+    background-size: initial;
+    background-repeat-x: repeat;
+    background-repeat-y: no-repeat;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+}
+.wavy_line {
+    background: url(../img/wavy_line.png) repeat-x bottom;
+    background-image: url(../img/wavy_line.png);
+    background-position-x: center;
+    background-position-y: bottom;
+    background-size: initial;
+    background-repeat-x: repeat;
+    background-repeat-y: no-repeat;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+}
+.line {
+    background: url(../img/line.png) repeat-x bottom;
+    background-image: url(../img/line.png);
+    background-position-x: center;
+    background-position-y: bottom;
+    background-size: initial;
+    background-repeat-x: repeat;
+    background-repeat-y: no-repeat;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+}
+.dotted_line {
+    background: url(../img/dotted_line.png) repeat-x bottom;
+    background-image: url(../img/dotted_line.png);
+    background-position-x: center;
+    background-position-y: bottom;
+    background-size: initial;
+    background-repeat-x: repeat;
+    background-repeat-y: no-repeat;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+}
+.without_line {
+}
+.pretext{
+    border: 2px solid #004fa3;
+    text-align: center;
+    padding-left: 1px;
+    padding-right: 1px;
+    height: auto;
+
+}
+.union{
+    border: 2px solid #004fa3;
+    text-align: center;
+    padding-left: 1px;
+    padding-right: 1px;
+    height: auto;
+    border-radius: 45%;
+    text-align: center;
+}
