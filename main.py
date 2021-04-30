@@ -6,6 +6,7 @@ from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
 import uuid
 import datetime
+import os
 
 from data import db_session
 from data.users import User
@@ -170,6 +171,7 @@ def api_morph_pars():
 
 def main():
     db_session.global_init("db/blogs.db")
+    port = int(os.environ.get("PORT", 5000))
     app.run()
 
 
