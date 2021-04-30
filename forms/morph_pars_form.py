@@ -5,6 +5,6 @@ from wtforms.validators import DataRequired
 
 
 class MorphParsForm(FlaskForm):
-    text = TextAreaField('Текст', validators=[DataRequired()], render_kw={"rows": 8})
+    text = TextAreaField('Введите текст:', validators=[DataRequired()], render_kw={"rows": 4})
     check_grammar = BooleanField("Проверить грамматику")
     submit = SubmitField('Проверить')

@@ -1,12 +1,11 @@
-from flask import (Flask, render_template, make_response, redirect, request, jsonify, render_template_string)
+# -*- coding: utf-8 -*-
+from flask import (Flask, render_template, make_response, redirect, jsonify, render_template_string, g)
 from flask_login import (LoginManager, login_user, logout_user, login_required)
 from flask_restful import reqparse
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
 import uuid
-import jwt
 import datetime
-from functools import wraps
-from werkzeug.security import check_password_hash
 
 from data import db_session
 from data.users import User
@@ -20,12 +19,53 @@ app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=1)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 Generator = GenerateMorphPars()
 
 parser = reqparse.RequestParser()
 parser.add_argument('text', required=True, type=str)
 
+basic_auth = HTTPBasicAuth()
+token_auth = HTTPTokenAuth()
+
+
+@app.route('/tokens', methods=['POST'])
+@basic_auth.login_required
+def get_token():
+    db_sess = db_session.create_session()
+    token = g.current_user.get_token()
+    db_sess.commit()
+    return jsonify({'token': token})
+
+
+@basic_auth.verify_password
+def verify_password(name, password):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.name == name).first()
+    if user is None:
+        return False
+    g.current_user = user
+    return user.check_password(password)
+
+
+@token_auth.verify_token
+def verify_token(token):
+    g.current_user = User.check_token(token) if token else None
+    return g.current_user is not None
+
+
+@token_auth.error_handler
+def token_auth_error():
+    return make_response(jsonify({'error': 'Unauthorized'}), 401)
+
+
+@basic_auth.error_handler
+def basic_auth_error():
+    return make_response(jsonify({'error': 'Unauthorized'}), 401)
+
+
+# basic
 
 @app.errorhandler(404)
 def not_found(error=None):
@@ -62,7 +102,7 @@ def reqister():
     return render_template('register.html', title='Регистрация', form=form)
 
 
-@app.route('/')
+@app.route('/')  # redirect on morph_pars
 def index():
     return redirect('/morph_pars')
 
@@ -87,64 +127,24 @@ def logout():
     return redirect('/login')
 
 
+@app.route('/api_document')
+def api_document():
+    return render_template('api_document.html')
+
+
 @app.route('/morph_pars', methods=['GET', 'POST'])
 @login_required
 def morph_pars():
     form = MorphParsForm()
     if form.validate_on_submit():
-        try:
-            ret = Generator.main_generate(form.text.data)
-            return render_template('morph_pars.html', form=form, content=render_template_string(ret))
-        except:
-            return render_template('morph_pars.html', form=form, content=Generator.plug(),
-                                   errors='Не получилось(\nПопробуйте другой текст.')
+        ret = Generator.main_generate(form.text.data)
+        return render_template('morph_pars.html', form=form, content=render_template_string(ret))
+
     return render_template('morph_pars.html', form=form, content=Generator.plug())
 
 
-def token_required(f):
-    @wraps(f)
-    def decorator(*args, **kwargs):
-        token = None
-        print(request.headers)
-        if 'token' in request.headers:
-            token = request.headers['token']
-        if not token:
-            return jsonify({'message': 'a valid token is missing'})
-        try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-            db_sess = db_session.create_session()
-            current_user = db_sess.query(User).filter_by(public_id=data['public_id']).first()
-        except:
-            return jsonify({'message': 'token is invalid'})
-        return f(current_user, *args, **kwargs)
-
-    return decorator
-
-
-@app.route('/api/get_token', methods=['GET', 'POST'])
-def get_token():
-    auth = request.authorization
-
-    if not auth or not auth.username or not auth.password:
-        return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "login required"'})
-
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter_by(name=auth.username).first()
-    if not user:
-        return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "Password required"'})
-    if check_password_hash(user.password, auth.password):
-        token = jwt.encode(
-            {'public_id': user.public_id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60)},
-            app.config['SECRET_KEY'],
-            algorithm='HS256',
-        )
-        return jsonify({'token': token})
-
-    return make_response('could not verify', 401, {'WWW.Authentication': 'Basic realm: "Password required"'})
-
-
 @app.route('/api/user', methods=['GET'])
-@token_required
+@token_auth.login_required
 def get_all_users():
     db_sess = db_session.create_session()
     users = db_sess.query(User).all()
@@ -161,8 +161,8 @@ def get_all_users():
 
 
 @app.route('/api/morph_pars', methods=['GET'])
-@token_required
-def get():
+@token_auth.login_required
+def api_morph_pars():
     args = parser.parse_args()
     ret = LOGIC.json_pars(args['text'])
     return jsonify({'result': ret})

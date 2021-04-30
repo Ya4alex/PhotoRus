@@ -1,5 +1,6 @@
 .word {
     margin-left: 6px;
+    margin-right: 0px;
 }
 .dash_dotted_line {
     background: url(../img/dash_dotted_line.png) repeat-x bottom;

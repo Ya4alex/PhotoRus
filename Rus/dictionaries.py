@@ -2,8 +2,6 @@ from pprint import pprint
 
 groups = {
     'root': 'основная группа',
-    'acl': 'причастная группа',
-    'amod': 'причастная группа',
 }
 
 transl_tag = {
@@ -95,21 +93,3 @@ transl_to_lines = {
     None: 'False',
 
 }
-
-if __name__ == '__main__':
-    tr = {}
-    for k, v in transl_tag.items():
-        if "подлеж" in str(v):
-            tr[k] = 'line'
-        elif "сказ" in str(v):
-            tr[k] = 'double_line'
-        elif "допол" in str(v):
-            tr[k] = 'dotted_line'
-        elif 'опред' in str(v):
-            tr[k] = 'wavy_line'
-        elif 'обстоят' in str(v):
-            tr[k] = 'dash_dotted_line'
-        else:
-            tr[k] = False
-            print(k, v)
-    pprint(tr)

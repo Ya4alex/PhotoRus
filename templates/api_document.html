@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h1">Авторизация</h1>
+<div style="margin-left: 12px">
+    <h2>Morph_pars</h2>
+    <div style="margin-left: 12px">
+        <selector class="lead">
+            Для работы с этим инструментом необходимо иметь <a href="/api/get_token">токен</a> который
+            можно получить, пройдя <a href="/register">регистрацию</a>. Токен указывается в заголовке запроса.
+        </selector>
+        <ul>
+            <li>morph_pars принимает обязательный оргумент <strong>text</strong> (str)</li>
+            <li>и не обязательный аргумент <strong>check_grammar</strong> (bool).</li>
+        </ul>
+        <p>
+            ответ сервера приходит в формате json.
+        </p>
+    </div>
+</div>
+{% endblock %}

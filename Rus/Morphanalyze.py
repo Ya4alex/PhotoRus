@@ -163,3 +163,25 @@ def func_morphanalyze(string):
             res = {'parsed': True, 'data': ret}
             return res
         return {'parsed': False}
+
+
+var = [
+    {
+        'word': "vasy",
+        'part': "",
+        'features': [
+            {'time': 1234},
+            {}
+        ],
+
+    },
+    {
+        'word': "vasy",
+        'part': "",
+        'features': [
+            {'time': 1234},
+            {}
+        ],
+
+    }
+]

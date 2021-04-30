@@ -1,8 +1,7 @@
 from Rus.Logic import Logic
 from Rus.dictionaries import transl_to_lines
 from pprint import pprint
-from dominate.tags import *
-from flask import render_template
+from dominate.tags import div, span
 
 LOGIC = Logic()
 
@@ -10,6 +9,7 @@ LOGIC = Logic()
 class GenerateMorphPars:
     def main_generate(self, text):
         sentences = LOGIC.json_pars(text)
+        pprint(sentences)
         ret = div(cls="class")
         for sent in sentences:
             ret.add(self.sent_generate(sent))
@@ -34,18 +34,17 @@ class GenerateMorphPars:
                 continue
 
             elif group['tag'] and word['relations']['m_head_id'] != group['id']:
-                dv = div(cls=f"{group['tag']} fon")
+                dv = div(cls=f"{group['tag']} fon2")
                 dv.add(container)
                 ret.add(dv)
 
                 group = {'tag': False, 'id': False}
                 container = None
 
-            if not group['tag'] and not group['id'] and word['relations']['group']['tag'] in ('acl', 'gerund', 'amod'):
+            if not group['tag'] and not group['id'] and word['relations']['group']['tag'] in ('partic', 'gerund'):
                 group = {'tag': word['relations']['group']['tag'], 'id': word['relations']['m_head_id']}
                 container = span(
-                    cls={'amod': 'wavy_line',
-                         'acl': 'wavy_line',
+                    cls={'partic': 'wavy_line',
                          'gerund': 'dash_dotted_line'}[word['relations']['group']['tag']])
 
                 line = transl_to_lines[word['feathers']['natasha_tag']]
@@ -58,7 +57,7 @@ class GenerateMorphPars:
                 container.add(h_word)
                 continue
 
-            if transl_to_lines[word['feathers']['natasha_tag']]:
+            if transl_to_lines.get(word['feathers']['natasha_tag']):
                 h_word = span(
                     cls=f"{transl_to_lines[word['feathers']['natasha_tag']]} word",
                 )

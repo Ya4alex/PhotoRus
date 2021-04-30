@@ -1,5 +1,5 @@
 from pprint import pprint
-from .dictionaries import pos_tags_morph_to_nat, transl_tag, groups
+from dictionaries import pos_tags_morph_to_nat, transl_tag, groups
 
 import logging
 import pymorphy2
@@ -48,20 +48,16 @@ def func_grammarchecker(string):
                             'group': {'tag': None, 'human_tag': None}
                         }
                     })
-                if count == 1:  # часть речи
+                if count == 1:
                     suggest = []
-                    flag_out = False
                     for p in morph.parse(local_word):
                         if p.tag.POS not in suggest:
                             suggest.append(p.tag.POS)
                             if None in suggest:
-                                result[-1]['feathers']['obj'] = str(p.tag)  # часть речи
+                                result[-1]['feathers']['obj'] = str(p.tag) # часть речи
                                 count += 1
-                                flag_out = True
                                 continue
-                    if flag_out:
-                        continue
-                    try:  # чекнуть
+                    try:
                         if k in suggest and len(suggest) == 1:
                             result[-1]['feathers']['obj'] = k
                         else:
@@ -73,10 +69,13 @@ def func_grammarchecker(string):
                         if len(suggest) == 1:
                             result[-1]['feathers']['obj'] = suggest[0]
                         else:
-                            if k == "X":  # добавить токен Х
-                                pass
-                            else:
-                                result[-1]['feathers']['obj'] = pos_tags_morph_to_nat[k]
+                            if k == "X":
+                                print('\nX---------------------------')
+                                pprint(result)
+                                print(string)
+                                print(num)
+                                [i ** 0.5 for i in range(1000)]
+                            result[-1]['feathers']['obj'] = pos_tags_morph_to_nat[k]
                 if count == 2:
                     if 'Case' in k and result[-1]['feathers']['obj'] == 'VERB':
                         result[-1]['feathers']['set']['Mood'] = 'povel'
@@ -97,14 +96,20 @@ def func_grammarchecker(string):
             local_obj = result[num]['feathers']['obj']
         except IndexError:
             print('\n\n--------------------------------')
+            print(num, len(doc.tokens))
+            pprint(doc.tokens)
+            print()
+            pprint(result)
+            print()
+            pprint(doc.sents[0].morph)
             print(string)
             break
         # print(doc.tokens[num])
-        rel = doc.tokens[num].rel
         result[num]['relations']['head_id'] = int(doc.tokens[num].head_id.split('_')[1]) - 1
         result[num]['relations']['id'] = int(doc.tokens[num].id.split('_')[1]) - 1
         result[num]['feathers']['feats'] = doc.tokens[num].feats
-        result[num]['feathers']['natasha_tag'] = rel
+
+        rel = doc.tokens[num].rel
 
         # -------------------
         if transl_tag.get(rel) is None:
@@ -114,13 +119,13 @@ def func_grammarchecker(string):
             continue
         # --------------------
 
-        if local_obj in ('GRND', 'PRTF', 'PRTS') and rel != 'root':  # сократить
+        if local_obj == 'GRND' or local_obj == 'PRTF' or local_obj == 'PRTS' and rel != 'root':
             if local_obj == 'GRND':
                 photorus_tag = 'деепричастие'
             else:
                 photorus_tag = 'причастие'
         elif (local_obj == 'NOUN' and transl_tag[str(rel)] == 'сказуемое' and  # тут
-              result[num]['feathers']['set']['Case'] != 'Loc'):  # чек
+              result[num]['feathers']['set']['Case'] != 'Loc'):
 
             photorus_tag = 'подлежащие'
         elif local_obj == 'NPRO' and transl_tag[str(rel)] == 'сказуемое':
@@ -133,6 +138,7 @@ def func_grammarchecker(string):
             if photorus_tag is None:
                 photorus_tag = result[result[num]['relations']['head_id']]['feathers']['photorus_tag']
 
+        result[num]['feathers']['natasha_tag'] = rel  # <---- ruski debug
         result[num]['feathers']['photorus_tag'] = photorus_tag
 
     for i, word in enumerate(result):
@@ -163,3 +169,6 @@ def func_grammarchecker(string):
         'content': result,
         'sent': string
     }
+
+if __name__ == '__main__':
+    morph_tagger
