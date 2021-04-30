@@ -1,0 +1,9 @@
+pyenchant~=3.2.0
+pymorphy2~=0.9.1
+natasha~=1.4.0
+SQLAlchemy~=1.4.3
+Werkzeug~=1.0.1
+WTForms~=2.3.3
+Flask~=1.1.2
+requests~=2.25.1
+dominate~=2.6.0
