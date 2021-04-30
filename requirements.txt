@@ -41,7 +41,6 @@ packaging==20.9
 pandas==1.2.4
 parso==0.8.1
 pathy==0.5.2
-Pillow==8.1.0
 plotly==4.14.3
 preshed==3.0.5
 PyAutoGUI==0.9.52
@@ -55,7 +54,6 @@ pymorphy2-dicts-ru==2.4.417127.4579844
 PyMsgBox==1.0.9
 pyparsing==2.4.7
 pyperclip==1.8.2
-pypiwin32==223
 PyRect==0.1.4
 PyScreeze==0.1.26
 python-dateutil==2.8.1
