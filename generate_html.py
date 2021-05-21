@@ -1,15 +1,14 @@
 from Rus.Logic import Logic
 from Rus.dictionaries import transl_to_lines
 from pprint import pprint
-from dominate.tags import div, span
+from dominate.tags import div, span, table, th, tr, td, tbody, nav, ul, li, a
 
 LOGIC = Logic()
 
 
-class GenerateMorphPars:
-    def main_generate(self, text):
-        sentences = LOGIC.json_pars(text)
-        pprint(sentences)
+class GenerateSyntacticPars:
+    def main_generate(self, text, grammar_check=False):
+        sentences = LOGIC.syntactic_pars(text, grammar_check)
         ret = div(cls="class")
         for sent in sentences:
             ret.add(self.sent_generate(sent))
@@ -73,12 +72,64 @@ class GenerateMorphPars:
         return ret
 
     def set_title(self, h_word, word):
-        h_word.set_attribute('title',
-                             "{}\n{}\n{}\nid:{} h_id:{} m_h_id:{}".format(
-                                 word['feathers']['photorus_tag'], word['feathers']['natasha_tag'],
-                                 word['relations']['group']['human_tag'], word['relations']['id'],
-                                 word['relations']['head_id'], word['relations']['m_head_id']))
+        h_word.set_attribute(
+            'title',
+            "{}\n{}\n{}\nid:{} h_id:{} m_h_id:{}".format(
+                word['feathers']['photorus_tag'], word['feathers']['natasha_tag'],
+                word['relations']['group']['human_tag'], word['relations']['id'],
+                word['relations']['head_id'], word['relations']['m_head_id']))
         return h_word
+
+    def plug(self):
+        return div()
+
+
+class GenerateMorphPars:
+    def __init__(self):
+        pass
+
+    def main_generate(self, word, check_grammar=False):
+        pars = LOGIC.morph_pars(word, check_grammar)
+        ret = div()
+        but = ul()
+        for i, part in enumerate(pars):
+            ret.add(self.part_generate(part, i))
+            but.add(li(a(f"{part['part']}", href=f"#yak{i}"), cls="morph_btn"))
+        return ret.render(), nav(but, id="menu").render()
+
+    def part_generate(self, part, i):
+        body = tbody()
+        body.add(*self.parts(part))
+        return div(table(body, cls="table table-sm morph_table"), cls='var', id=f"yak{i}")
+
+    def parts(self, part):
+        part_speech = tr()
+        part_speech.add(th('часть речи'))
+        part_speech.add(td(div(part['part'], cls='main part')))
+
+        normal_form = tr()
+        normal_form.add(td('начальная форма'))
+        normal_form.add(td(div(part['normal_form'], cls='main normal_form')))
+
+        value = div(cls='main regular')
+        for v in map(str, part['ru_regular_signs']):
+            value.add(div(v, cls='main sig'))
+        if not part['ru_regular_signs']:
+            value.add('нет постоянных признаков')
+        regular_signs = tr()
+        regular_signs.add(td('постоянные признаки'))
+        regular_signs.add(td(value))
+
+        value = div(cls='main irregular')
+        for v in map(str, part['ru_irregular_signs']):
+            value.add(div(v, cls='main sig'))
+        if not part['ru_irregular_signs']:
+            value.add('нет непостоянных признаков')
+        irregular_signs = tr()
+        irregular_signs.add(td('непостоянные признаки'))
+        irregular_signs.add(td(value))
+
+        return part_speech, normal_form, regular_signs, irregular_signs
 
     def plug(self):
         return div()

@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 import sqlalchemy
 import os
 import base64
+import uuid
+
 from . import db_session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -12,7 +14,7 @@ class User(db_session.SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    public_id = sqlalchemy.Column(sqlalchemy.String, unique=True)
+    public_id = sqlalchemy.Column(sqlalchemy.String, unique=True, default=str(uuid.uuid4()))
 
     name = sqlalchemy.Column(sqlalchemy.String, unique=True)
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True)
@@ -30,12 +32,12 @@ class User(db_session.SqlAlchemyBase, UserMixin, SerializerMixin):
         return check_password_hash(self.password, password)
 
     def get_token(self, expires_in=3600):
+        db_sess = db_session.create_session()
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
         self.token_expiration = now + timedelta(seconds=expires_in)
-        db_sess = db_session.create_session()
         db_sess.add(self)
         db_sess.commit()
         return self.token

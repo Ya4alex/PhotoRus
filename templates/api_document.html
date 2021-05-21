@@ -1,21 +1,105 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="h1">Авторизация</h1>
-<div style="margin-left: 12px">
-    <h2>Morph_pars</h2>
-    <div style="margin-left: 12px">
+<h1 class="h1">Документация</h1>
+<div class="paragraph">
+    <h2>Авторизация <small><a href="/api/get_token">/api/get_token</a></small></h2>
+    <div class="paragraph">
         <selector class="lead">
-            Для работы с этим инструментом необходимо иметь <a href="/api/get_token">токен</a> который
-            можно получить, пройдя <a href="/register">регистрацию</a>. Токен указывается в заголовке запроса.
+            Для работы с ресурсами необходимо иметь <a href="/api/get_token">токен</a> который
+            можно получить, пройдя <a href="/register">регистрацию</a>.
         </selector>
+        <h6 style="margin-left: 12px">Пример на <a href="https://github.com/psf/requests">requests</a>:</h6>
+        <div class="code">
+        <pre style="margin: 0px;"><code class="language-python">import requests
+from requests.auth import HTTPBasicAuth
+
+token = requests.get(
+    'http://127.0.0.1:5000/api/get_token',
+    auth=HTTPBasicAuth('Username', 'Password'),
+)
+print(token.json())
+</code></pre>
+        </div>
+        <selector class="lead">
+            В запросах токен указывается в заголовке <strong>token</strong>.
+        </selector>
+        <br>
+        <h6 style="margin-left: 12px">Пример с применением токена:</h6>
+        <div class="code">
+        <pre style="margin: 0px;"><code class="language-python">import requests
+
+request = requests.get(
+    url='http://127.0.0.1:5000/api/morph_pars',
+    params=params,
+    headers={'token': token}
+)
+</code></pre>
+        </div>
+    </div>
+    <br>
+    <h2>Синтаксический разбор предложения <small><a href="/api/syntactic_parsing">/api/syntactic_parsing</a></small>
+    </h2>
+    <div class="paragraph">
+        <selector class="lead">
+            Возвращает словарь в формате <a href="https://ru.wikipedia.org/wiki/JSON">.json</a> c синтаксическим
+            анализом предложений. Для работы нужен
+            токен, иначе вернет <strong>401</strong>.
+        </selector>
+        <h4 style="margin-left: 12px">Параметры запроса:</h4>
         <ul>
-            <li>morph_pars принимает обязательный оргумент <strong>text</strong> (str)</li>
-            <li>и не обязательный аргумент <strong>check_grammar</strong> (bool).</li>
+            <li><strong>text</strong> (str) обязательный оргумент c текстом. Если в тексте больше одного предложения,
+                они будут разделены
+            </li>
+            <li><strong>check_grammar</strong> (bool) не обязательный аргумент. Испраить грамматические ошибки и
+                опечатки. Значительно увеличивается время обработки запроса.
+            </li>
         </ul>
-        <p>
-            ответ сервера приходит в формате json.
-        </p>
+        <h4 style="margin-left: 12px">Формат ответа:</h4>
+        <div class="code">
+        <pre style="margin: 0px;"><code class="language-python">[
+    {
+        "content":
+            [
+                {
+                    "feathers": {
+                        "feats": {
+                            "Case": "Nom",
+                            "Number": "Sing",
+                            "Person": "1"
+                        },
+                        "natasha_tag": "nsubj",
+                        "obj": "NPRO",
+                        "photorus_tag": "подлежащее",
+                        "set": {
+                            "Case": "Nom",
+                            "Mood": None
+                        }
+                    },
+                    "relations": {
+                        "group": {
+                            "human_tag": "основная группа",
+                            "tag": "root"
+                        },
+                        "head_id": 1,
+                        "id": 0,
+                        "m_head_id": 1
+                    },
+                    "word": "Я"
+                },
+                {'''другое слово'''},
+                {'''ещё слово'''},
+                {'''точка'''},
+            ],
+        "sent": "Я люблю майнкрафт."
+    },
+    {'''другое предложение'''}
+]
+</code></pre>
+        </div>
+        <br>
+        <div style="margin-left: 12px">
+        </div>
     </div>
 </div>
 {% endblock %}

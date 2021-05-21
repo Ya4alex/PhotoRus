@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="h1">Морфологический разбор предложения</h1>
+<h1 class="h1">Морфологический разбор слова</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <p>
@@ -19,6 +19,7 @@
 </form>
 <p>
     {{errors}}
+    {% autoescape false %}{{but}}{% endautoescape %}
     {% autoescape false %}{{content}}{% endautoescape %}
 </p>
 {% endblock %}

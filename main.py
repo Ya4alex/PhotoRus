@@ -1,76 +1,36 @@
 # -*- coding: utf-8 -*-
-from flask import (Flask, render_template, make_response, redirect, jsonify, render_template_string, g)
+from flask import (Flask, render_template, redirect, render_template_string)
 from flask_login import (LoginManager, login_user, logout_user, login_required)
-from flask_restful import reqparse
-from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+from flask_restful import Api
 
-import uuid
 import datetime
 import os
 
 from data import db_session
 from data.users import User
 from forms.user import LoginForm, RegisterForm
-from forms.morph_pars_form import MorphParsForm
-from generate_morph_pars_html import GenerateMorphPars, LOGIC
+from forms.pars_form import SyntacticParsForm, MorphParsForm
+from generate_html import GenerateSyntacticPars, GenerateMorphPars
+from API import blueprint, UserApiResource
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yaalex_andrew_photorus'
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=1)
 
+api = Api(app)
+api.add_resource(UserApiResource, '/api/user')
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-Generator = GenerateMorphPars()
+GenerateSyntactic = GenerateSyntacticPars()
+GenerateMorph = GenerateMorphPars()
 
-parser = reqparse.RequestParser()
-parser.add_argument('text', required=True, type=str)
-
-basic_auth = HTTPBasicAuth()
-token_auth = HTTPTokenAuth()
-
-
-@app.route('/tokens', methods=['POST'])
-@basic_auth.login_required
-def get_token():
-    db_sess = db_session.create_session()
-    token = g.current_user.get_token()
-    db_sess.commit()
-    return jsonify({'token': token})
-
-
-@basic_auth.verify_password
-def verify_password(name, password):
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.name == name).first()
-    if user is None:
-        return False
-    g.current_user = user
-    return user.check_password(password)
-
-
-@token_auth.verify_token
-def verify_token(token):
-    g.current_user = User.check_token(token) if token else None
-    return g.current_user is not None
-
-
-@token_auth.error_handler
-def token_auth_error():
-    return make_response(jsonify({'error': 'Unauthorized'}), 401)
-
-
-@basic_auth.error_handler
-def basic_auth_error():
-    return make_response(jsonify({'error': 'Unauthorized'}), 401)
-
-
-# basic
 
 @app.errorhandler(404)
-def not_found(error=None):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+def not_found(error):
+    return render_template('not_found.html', title='404')
 
 
 @login_manager.user_loader
@@ -80,7 +40,7 @@ def load_user(user_id):
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def reqister():
+def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
@@ -88,24 +48,31 @@ def reqister():
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация', form=form,
-                                   message="Такой пользователь уже есть")
+                                   message="Пользователь с такой почтой уже есть")
+        if db_sess.query(User).filter(User.name == form.name.data).first():
+            return render_template('register.html', title='Регистрация', form=form,
+                                   message="Пользователь с таким именем уже есть")
 
-        user = User(
-            name=form.name.data,
-            public_id=str(uuid.uuid4()),
-            email=form.email.data,
-        )
+        user = User()
+        user.name = form.name.data
+        user.email = form.email.data
         user.set_password(form.password.data)
-        user.admin = True
+
         db_sess.add(user)
         db_sess.commit()
-        return redirect('/login')
+        login_user(user)
+        return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
 
 
-@app.route('/')  # redirect on morph_pars
+@app.route('/')
 def index():
-    return redirect('/morph_pars')
+    return redirect('/about_us')
+
+
+@app.route('/about_us')
+def about_us():
+    return render_template('about_us.html', title='about_us')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -116,8 +83,8 @@ def login():
         user = db_sess.query(User).filter(User.email == form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            return redirect("/morph_pars")
-        return render_template('login.html', message="Неправильный логин или пароль", form=form)
+            return redirect("/")
+        return render_template('login.html', title='Авторизация', message="Неправильный логин или пароль", form=form)
     return render_template('login.html', title='Авторизация', form=form)
 
 
@@ -130,7 +97,19 @@ def logout():
 
 @app.route('/api_document')
 def api_document():
-    return render_template('api_document.html')
+    return render_template('api_document.html', title='Документация')
+
+
+@app.route('/syntactic_parsing', methods=['GET', 'POST'])
+@login_required
+def syntactic_parsing():
+    form = SyntacticParsForm()
+    if form.validate_on_submit():
+        ret = GenerateSyntactic.main_generate(form.text.data, form.check_grammar.data)
+        return render_template('syntactic_parsing.html', form=form, content=render_template_string(ret),
+                               title='Синтаксический разбор предложения')
+    return render_template('syntactic_parsing.html', form=form, content=GenerateSyntactic.plug(),
+                           title='Синтаксический разбор предложения')
 
 
 @app.route('/morph_pars', methods=['GET', 'POST'])
@@ -138,41 +117,22 @@ def api_document():
 def morph_pars():
     form = MorphParsForm()
     if form.validate_on_submit():
-        ret = Generator.main_generate(form.text.data)
-        return render_template('morph_pars.html', form=form, content=render_template_string(ret))
-
-    return render_template('morph_pars.html', form=form, content=Generator.plug())
-
-
-@app.route('/api/user', methods=['GET'])
-@token_auth.login_required
-def get_all_users():
-    db_sess = db_session.create_session()
-    users = db_sess.query(User).all()
-    result = []
-
-    for user in users:
-        result.append({
-            'public_id': user.public_id,
-            'name': user.name,
-            'password': user.password,
-            'admin': user.admin
-        })
-    return jsonify({'users': result})
-
-
-@app.route('/api/morph_pars', methods=['GET'])
-@token_auth.login_required
-def api_morph_pars():
-    args = parser.parse_args()
-    ret = LOGIC.json_pars(args['text'])
-    return jsonify({'result': ret})
+        ret, but = GenerateMorph.main_generate(form.text.data, form.check_grammar.data)
+        return render_template('morph_parsing.html', form=form, content=render_template_string(ret), but=but,
+                               title='Морфологический анализ слова')
+    return render_template('morph_parsing.html', form=form, content=GenerateMorph.plug(), but=GenerateMorph.plug(),
+                           title='Морфологический анализ слова')
 
 
 def main():
     db_session.global_init("db/blogs.db")
+    app.register_blueprint(blueprint)
+
+    db = db_session.create_session()
+    db.commit()
+
     port = int(os.environ.get("PORT", 5000))
-    app.run()
+    app.run(port=port)
 
 
 if __name__ == '__main__':

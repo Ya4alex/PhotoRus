@@ -1,3 +1,26 @@
-.header_color{
-    color: #dddddd;
+.navbar{
+    background-color: #3697ff!important;
+}
+.register{
+    background-color: #006de2;
+    border-color: #006de2;
+}
+.login{
+    background-color: #31c452;
+    border-color: #31c452;
+}
+.paragraph{
+    margin-left: 26px;
+}
+.code{
+  align-items: center;
+  justify-content: flex-start;
+
+  border-top: 3px solid #004fa3;
+  border-radius: 8px;
+
+  padding: 10px;
+  padding-top: 6px;
+
+  background: #d6dfe9;
 }

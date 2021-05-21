@@ -10,15 +10,24 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/background.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/underline.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/morph.css') }}">
 
     <title>{{title}}</title>
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/icon.png') }}" type="image/png">
+    <link rel="icon" href="{{ url_for('static', filename='img/icon.png') }}" type="image/png">
+
 </head>
 <body>
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <a class="navbar-brand" href="#">PhotoRus</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary navbar">
+        <a class="navbar-brand" href="/">PhotoRus</a>
         <div class="collapse navbar-collapse" id="navbarColor02">
             <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/syntactic_parsing">Syntactic Parser <span
+                            class="sr-only">(current)</span></a>
+                </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="/morph_pars">Morph Parser <span class="sr-only">(current)</span></a>
                 </li>
@@ -26,18 +35,17 @@
                     <a class="nav-link" href="/api_document">Api Documentation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/">About Us</a>
+                    <a class="nav-link" href="/about_us">About Us</a>
                 </li>
             </ul>
         </div>
         {% if current_user.is_authenticated %}
         <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
         {% else %}
-        <p>
-
-            <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
-            <a class="btn btn-success" href="/login">Войти</a>
-        </p>
+        <div class="btn-group" role="group" aria-label="Basic example">
+            <a type="button" class="btn btn-primary register" href="/register">Зарегистрироваться</a>
+            <a type="button" class="btn btn-success login" href="/login">Войти</a>
+        </div>
         {% endif %}
     </nav>
 </header>
