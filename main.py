@@ -128,6 +128,4 @@ def morph_pars():
 
 if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
-
-    port = int(os.environ.get("PORT", 5000))
-    app.run(port=port)
+    app.run()
