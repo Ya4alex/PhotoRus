@@ -14,6 +14,6 @@ Flask-Login==0.5.0
 Flask-WTF==0.14.3
 Jinja2==2.11.3
 flask_restful
-
+enchant
 SQLAlchemy-serializer==1.3.4.4
 gunicorn
