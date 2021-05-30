@@ -24,6 +24,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+app.register_blueprint(blueprint)
+
 GenerateSyntactic = GenerateSyntacticPars()
 GenerateMorph = GenerateMorphPars()
 
@@ -124,16 +126,8 @@ def morph_pars():
                            title='Морфологический анализ слова')
 
 
-def main():
+if __name__ == '__main__':
     db_session.global_init("db/blogs.db")
-    app.register_blueprint(blueprint)
-
-    db = db_session.create_session()
-    db.commit()
 
     port = int(os.environ.get("PORT", 5000))
     app.run(port=port)
-
-
-if __name__ == '__main__':
-    main()
